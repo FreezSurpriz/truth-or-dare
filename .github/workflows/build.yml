@@ -49,9 +49,23 @@ jobs:
           sdkmanager "build-tools;34.0.0"
           sdkmanager "ndk;25.2.9519653"
 
-      - name: Build APK
+      - name: Link SDK for Buildozer
         run: |
           set -euxo pipefail
+          mkdir -p "$HOME/.buildozer/android/platform"
+          ln -sfn "$ANDROID_SDK_ROOT" "$HOME/.buildozer/android/platform/android-sdk"
+
+      - name: Build APK
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          ANDROIDSDK: ${{ env.ANDROID_SDK_ROOT }}
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.2.9519653
+          ANDROIDNDK: ${{ env.ANDROID_SDK_ROOT }}/ndk/25.2.9519653
+        run: |
+          set -euxo pipefail
+          ls -la "$ANDROIDSDK/build-tools/34.0.0"
+          "$ANDROIDSDK/build-tools/34.0.0/aidl" --version || true
           buildozer -v android debug 2>&1 | tee build.log
 
       - name: Show generated APKs
